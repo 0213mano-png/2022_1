@@ -1104,100 +1104,29 @@ function shuffle(array) {
 
 function render() {
   const app = document.getElementById('app');
-  if (!app) return;
   app.innerHTML = "";
-  const doShuffle = !!(document.getElementById('shuffle') && document.getElementById('shuffle').checked);
+  const doShuffle = document.getElementById('shuffle').checked;
 
-  if (!Array.isArray(DATA) || DATA.length === 0) {
-    app.innerHTML = `<section class="card"><h2>データが読み込めませんでした</h2><p>DATAが空、または形式が不正です。</p></section>`;
-    return;
-  }
-
-  // 件数のヘッダー
-  const info = document.createElement('div');
-  info.className = 'card';
-  info.innerHTML = `<strong>読み込んだ設問数：</strong>${DATA.length} 件`;
-  app.appendChild(info);
-
-  DATA.forEach((q, idx) => {
+  DATA.forEach(q => {
     const card = document.createElement('section');
     card.className = 'card';
 
     const title = document.createElement('h2');
-    const titleText = q && q.title ? q.title : `問${q && q.id ? q.id : (idx+1)}`;
-    title.innerHTML = titleText;
+    title.innerHTML = q.title;
     card.appendChild(title);
 
     const optionsContainer = document.createElement('div');
     optionsContainer.className = 'options';
 
-    const opts = Array.isArray(q && q.options) ? q.options.slice() : [];
-    if (doShuffle) {
-      for (let i = opts.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [opts[i], opts[j]] = [opts[j], opts[i]];
-      }
-    }
+    // 最初にシャッフルして順序を固定
+    let opts = q.options.slice();
+    if (doShuffle) shuffle(opts);
 
-    if (opts.length === 0) {
-      const warn = document.createElement('div');
-      warn.textContent = 'この設問には選択肢が設定されていません。';
-      card.appendChild(warn);
-      app.appendChild(card);
-      return;
-    }
+    let answered = false;
 
     opts.forEach(opt => {
       const btn = document.createElement('button');
-      const label = (opt && typeof opt.label !== 'undefined') ? opt.label : '';
-      const text = (opt && typeof opt.text === 'string') ? opt.text : '';
-      btn.textContent = doShuffle ? text : (label ? `${label}. ${text}` : text);
-      btn.onclick = () => {
-        optionsContainer.querySelectorAll('button').forEach(b => b.disabled = true);
-        if (opt && opt.correct) {
-          btn.classList.add('correct');
-        } else {
-          btn.classList.add('incorrect');
-        }
-        // 正解を緑表示
-        optionsContainer.querySelectorAll('button').forEach((b, i) => {
-          const original = opts[i];
-          if (original && original.correct) b.classList.add('correct');
-        });
-        // 解説を表示
-        explanation.style.display = 'block';
-      };
-      optionsContainer.appendChild(btn);
-    });
-
-    card.appendChild(optionsContainer);
-
-    // 解説
-    const explanation = document.createElement('div');
-    explanation.className = 'explanation';
-    explanation.innerHTML = (q && q.explanation_html) ? q.explanation_html : '';
-    card.appendChild(explanation);
-
-    // リセット
-    const reset = document.createElement('button');
-    reset.className = 'reset-btn';
-    reset.textContent = 'リセット';
-    reset.onclick = () => {
-      optionsContainer.querySelectorAll('button').forEach((b, i) => {
-        b.classList.remove('correct','incorrect');
-        b.disabled = false;
-        const original = opts[i];
-        const label = (original && typeof original.label !== 'undefined') ? original.label : '';
-        const text = (original && typeof original.text === 'string') ? original.text : '';
-        b.textContent = doShuffle ? text : (label ? `${label}. ${text}` : text);
-      });
-      explanation.style.display = 'none';
-    };
-    card.appendChild(reset);
-
-    app.appendChild(card);
-  });
-}. ${opt.text}`;
+      btn.textContent = doShuffle ? opt.text : `${opt.label}. ${opt.text}`;
       btn.onclick = () => {
         if (answered) return;
         answered = true;
@@ -1259,18 +1188,11 @@ function render() {
 
 document.getElementById('shuffle').addEventListener('change', render);
 render();
-
-} catch(e) {
-  const app = document.getElementById('app');
-  if (app) {
-    app.innerHTML = `<section class="card"><h2>スクリプトエラー</h2><pre style="white-space:pre-wrap;">${e && (e.stack || e.message || e)}</pre></section>`;
-  } else {
-    document.body.insertAdjacentHTML('beforeend', `<section class="card"><h2>スクリプトエラー</h2><pre style="white-space:pre-wrap;">${e && (e.stack || e.message || e)}</pre></section>`);
-  }
-}
 </script>
 </body>
 </html>
+
+
 
 
 
