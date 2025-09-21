@@ -1189,8 +1189,53 @@ function render() {
 document.getElementById('shuffle').addEventListener('change', render);
 render();
 </script>
+  <script>
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = "";
+
+  DATA.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const h = document.createElement('h2');
+    h.innerHTML = q.title;
+    card.appendChild(h);
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
+
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt.label + ". " + opt.text;
+      btn.onclick = () => {
+        if (opt.correct) {
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('incorrect');
+        }
+        explanation.style.display = 'block';
+      };
+      optionsDiv.appendChild(btn);
+    });
+
+    card.appendChild(optionsDiv);
+
+    const explanation = document.createElement('div');
+    explanation.className = 'explanation';
+    explanation.innerHTML = q.explanation_html;
+    card.appendChild(explanation);
+
+    app.appendChild(card);
+  });
+}
+
+window.onload = render;
+</script>
+
 </body>
 </html>
+
 
 
 
